@@ -1,0 +1,332 @@
+# Payment Validation Test Payloads & Business Logic
+
+## Business Logic Analysis
+
+The payment validation system uses the `validate_payment_simple()` function with the following rules:
+
+### Validation Rules
+1. **Amount Valid**: Minimum amount ≥ 100.0
+2. **Reference Valid**: Reference number length ≥ 6 characters
+3. **Bank Valid**: Bank name cannot be empty/blank
+4. **Payment Type Valid**: Must be one of ["Bank In", "Online Transfer", "Credit Card"]
+
+### Security Checks
+1. **Duplicate Reference**: Reference number must be unique (not used in other applications)
+2. **Amount Range**: Amount must be between 100.0 and 10,000.0
+3. **Valid Format**: Reference number must be alphanumeric only
+
+### Overall Validation
+- Payment is considered valid ONLY if ALL validation rules AND security checks pass
+- Any single failure results in invalid payment
+
+## Test Payloads
+
+### 1. Valid Payment Scenarios
+
+#### Basic Valid Payment
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "REF123456",
+  "proof_url": "https://example.com/proof.pdf"
+}
+```
+
+#### Valid Online Transfer
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Online Transfer",
+  "bank_name": "OCBC Bank",
+  "amount": 500.75,
+  "reference_no": "TXN789012345",
+  "proof_url": "https://bank.com/receipt.jpg"
+}
+```
+
+#### Valid Credit Card Payment
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Credit Card",
+  "bank_name": "Visa Card",
+  "amount": 1000.0,
+  "reference_no": "CC4567890123",
+  "proof_url": null
+}
+```
+
+#### Minimum Valid Amount
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "UOB Bank",
+  "amount": 100.0,
+  "reference_no": "MIN100",
+  "proof_url": null
+}
+```
+
+#### Maximum Valid Amount
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Online Transfer",
+  "bank_name": "Maybank",
+  "amount": 10000.0,
+  "reference_no": "MAX10000",
+  "proof_url": "https://example.com/max_proof.pdf"
+}
+```
+
+### 2. Invalid Payment Scenarios
+
+#### Amount Too Low
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 99.99,
+  "reference_no": "LOW001",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `amount_valid` and `amount_range` checks
+
+#### Amount Too High
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 10000.01,
+  "reference_no": "HIGH001",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `amount_range` check
+
+#### Reference Too Short
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "SHORT",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `reference_valid` check (length < 6)
+
+#### Empty Bank Name
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "",
+  "amount": 250.0,
+  "reference_no": "EMPTY001",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `bank_valid` check
+
+#### Invalid Payment Type
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Cryptocurrency",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "CRYPTO123",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `payment_type_valid` check
+
+#### Non-Alphanumeric Reference
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "REF-123@456",
+  "proof_url": null
+}
+```
+**Expected Result**: Fails `valid_format` check
+
+### 3. Edge Case Scenarios
+
+#### Zero Amount
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 0.0,
+  "reference_no": "ZERO001",
+  "proof_url": null
+}
+```
+
+#### Negative Amount
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": -100.0,
+  "reference_no": "NEG001",
+  "proof_url": null
+}
+```
+
+#### Whitespace Bank Name
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "   ",
+  "amount": 250.0,
+  "reference_no": "SPACE001",
+  "proof_url": null
+}
+```
+
+#### Very Long Reference Number
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "VERYLONGREFERENCENUMBER123456789012345678901234567890",
+  "proof_url": null
+}
+```
+
+#### Case Sensitivity Test
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "bank in",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "CASE001",
+  "proof_url": null
+}
+```
+
+### 4. Security Test Scenarios
+
+#### Duplicate Reference Test
+First, submit a valid payment, then test with same reference:
+```json
+{
+  "application_id": "APP202406031235",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "REF123456",
+  "proof_url": null
+}
+```
+**Expected Result**: Should fail `duplicate_reference` check if REF123456 was used before
+
+#### SQL Injection Attempt in Reference
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 250.0,
+  "reference_no": "REF'; DROP TABLE--",
+  "proof_url": null
+}
+```
+
+### 5. Boundary Value Testing
+
+#### Exact Minimum Values
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "A",
+  "amount": 100.0,
+  "reference_no": "123456",
+  "proof_url": null
+}
+```
+
+#### Just Below Minimum
+```json
+{
+  "application_id": "APP202406031234",
+  "payment_type": "Bank In",
+  "bank_name": "DBS Bank",
+  "amount": 99.99,
+  "reference_no": "12345",
+  "proof_url": null
+}
+```
+
+## Testing Strategy
+
+### Prerequisites
+1. First create an application using `/apply` endpoint to get a valid `application_id`
+2. Use the returned `application_id` in payment validation tests
+
+### Test Sequence
+1. **Valid Cases First**: Ensure the system works with correct data
+2. **Individual Validation Rules**: Test each validation rule separately
+3. **Security Checks**: Test security constraints
+4. **Edge Cases**: Test boundary conditions and unusual inputs
+5. **Duplicate Reference**: Test after creating successful payments
+
+### Expected Response Format
+```json
+{
+  "application_id": "APP202406031234",
+  "validation_result": {
+    "valid": true/false,
+    "validation_results": {
+      "amount_valid": true/false,
+      "reference_valid": true/false,
+      "bank_valid": true/false,
+      "payment_type_valid": true/false
+    },
+    "security_checks": {
+      "duplicate_reference": true/false,
+      "amount_range": true/false,
+      "valid_format": true/false
+    },
+    "validated_at": "2025-06-03T..."
+  },
+  "status": "PAYMENT_VALIDATED" or "PAYMENT_FAILED"
+}
+```
+
+## Business Logic Improvements
+
+### Current Limitations
+1. **Simple Validation**: Basic checks without real banking integration
+2. **No Fraud Detection**: No advanced security measures
+3. **Static Rules**: Hard-coded validation rules
+4. **No Real-time Verification**: No actual bank API calls
+
+### Recommended Enhancements
+1. **Bank API Integration**: Real-time payment verification
+2. **Advanced Fraud Detection**: Pattern analysis, velocity checks
+3. **Configurable Rules**: Database-driven validation rules
+4. **Audit Trail**: Detailed logging of all validation attempts
+5. **Rate Limiting**: Prevent brute force attacks
+6. **Transaction Timeout**: Time-limited payment windows
