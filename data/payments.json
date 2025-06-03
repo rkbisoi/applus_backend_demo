@@ -1,0 +1,304 @@
+[
+  {
+    "application_id": "APP_20250603_184019_0001",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 90,
+      "security_score": 70,
+      "overall_score": 82,
+      "overall_status": "PENDING",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.3661668300628662,
+        "throughput_score": 30,
+        "concurrent_capacity": 191,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T18:40:26.502363"
+    },
+    "validation_date": "2025-06-03T18:40:26.878373",
+    "status": "Failed",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 90,
+    "security_score": 70,
+    "overall_score": 82,
+    "overall_status": "PENDING",
+    "reason": [
+      "Invalid merchant_id format",
+      "Invalid or placeholder terminal_id",
+      "Unauthenticated transaction detected",
+      "Suspicious terminal ID pattern"
+    ]
+  },
+  {
+    "application_id": "APP_20250603_192248_0004",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 90,
+      "security_score": 70,
+      "overall_score": 82,
+      "overall_status": "PENDING",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.3550994396209717,
+        "throughput_score": 30,
+        "concurrent_capacity": 178,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T19:22:55.300511"
+    },
+    "validation_date": "2025-06-03T19:22:55.668550",
+    "status": "Failed",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 90,
+    "security_score": 70,
+    "overall_score": 82,
+    "overall_status": "PENDING",
+    "reason": [
+      "Invalid merchant_id format",
+      "Invalid or placeholder terminal_id",
+      "Unauthenticated transaction detected",
+      "Suspicious terminal ID pattern"
+    ]
+  },
+  {
+    "application_id": "APP_20250603_192406_0005",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 80,
+      "security_score": 70,
+      "overall_score": 79,
+      "overall_status": "PENDING",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.21852707862854004,
+        "throughput_score": 20,
+        "concurrent_capacity": 104,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T19:24:14.015088"
+    },
+    "validation_date": "2025-06-03T19:24:14.244967",
+    "status": "Failed",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 80,
+    "security_score": 70,
+    "overall_score": 79,
+    "overall_status": "PENDING",
+    "reason": [
+      "Invalid merchant_id format",
+      "Invalid or placeholder terminal_id",
+      "Unauthenticated transaction detected",
+      "Suspicious terminal ID pattern"
+    ]
+  },
+  {
+    "application_id": "APP_20250603_192915_0006",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 80,
+      "security_score": 70,
+      "overall_score": 79,
+      "overall_status": "PENDING",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.2637338638305664,
+        "throughput_score": 20,
+        "concurrent_capacity": 135,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T19:29:22.767216"
+    },
+    "validation_date": "2025-06-03T19:29:23.039480",
+    "status": "Failed",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 80,
+    "security_score": 70,
+    "overall_score": 79,
+    "overall_status": "PENDING",
+    "reason": [
+      "Invalid merchant_id format",
+      "Invalid or placeholder terminal_id",
+      "Unauthenticated transaction detected",
+      "Suspicious terminal ID pattern"
+    ]
+  },
+  {
+    "application_id": "APP_20250603_193828_0008",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 70,
+      "security_score": 70,
+      "overall_score": 76,
+      "overall_status": "PENDING",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.24283790588378906,
+        "throughput_score": 10,
+        "concurrent_capacity": 70,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Low throughput capacity: 70",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T19:38:35.913020"
+    },
+    "validation_date": "2025-06-03T19:38:36.159113",
+    "status": "Failed",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 70,
+    "security_score": 70,
+    "overall_score": 76,
+    "overall_status": "PENDING",
+    "reason": [
+      "Invalid merchant_id format",
+      "Invalid or placeholder terminal_id",
+      "Low throughput capacity: 70",
+      "Unauthenticated transaction detected",
+      "Suspicious terminal ID pattern"
+    ]
+  },
+  {
+    "application_id": "APP_20250603_194010_0009",
+    "validation_result": {
+      "functional_score": 85,
+      "performance_score": 75,
+      "security_score": 70,
+      "overall_score": 77,
+      "overall_status": "APPROVED",
+      "functional_details": {
+        "required_fields_score": 30,
+        "format_score": 20,
+        "business_logic_score": 25,
+        "consistency_score": 10
+      },
+      "performance_details": {
+        "response_time_score": 30,
+        "actual_response_time": 0.21729040145874023,
+        "throughput_score": 15,
+        "concurrent_capacity": 75,
+        "memory_score": 30,
+        "payload_size": 850
+      },
+      "security_details": {
+        "authentication_score": 15,
+        "merchant_score": 25,
+        "integrity_score": 15,
+        "risk_score": 15
+      },
+      "failure_reasons": [
+        "Invalid merchant_id format",
+        "Invalid or placeholder terminal_id",
+        "Unauthenticated transaction detected",
+        "Suspicious terminal ID pattern"
+      ],
+      "validation_timestamp": "2025-06-03T19:40:17.493909"
+    },
+    "validation_date": "2025-06-03T19:40:17.712192",
+    "status": "Validated",
+    "auto_processed": true,
+    "functional_score": 85,
+    "performance_score": 75,
+    "security_score": 70,
+    "overall_score": 77,
+    "overall_status": "APPROVED"
+  }
+]

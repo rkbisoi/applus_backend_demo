@@ -1,20 +1,177 @@
 [
   {
-    "application_id": "APP202506037AACBA29",
-    "logs": [
-      {
-        "timestamp": "2025-06-03T13:26:34.251817Z",
-        "message": "Application submitted"
-      }
-    ]
+    "log_id": "f6c5bec5-0094-40d5-a0a4-a0d92e672c4c",
+    "application_id": "APP_20250603_184019_0001",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T18:40:19.478091",
+    "details": {}
   },
   {
-    "application_id": "APP20250603A9F28C77",
-    "logs": [
-      {
-        "timestamp": "2025-06-03T14:07:51.033392Z",
-        "message": "Application submitted"
-      }
-    ]
+    "log_id": "28d5f852-7b36-412a-8a83-a507522d1c15",
+    "application_id": "APP_20250603_184019_0001",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T18:40:21.491425",
+    "details": {}
+  },
+  {
+    "log_id": "cb23b6e9-4852-4855-9a0b-90b3d96c66aa",
+    "application_id": "APP_20250603_184019_0001",
+    "action": "Payment validation failed - Status: PENDING, Score: 82",
+    "timestamp": "2025-06-03T18:40:26.873376",
+    "details": {}
+  },
+  {
+    "log_id": "253561da-bf6b-4eb0-92c9-707517cd77ee",
+    "application_id": "APP_20250603_191740_0002",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:17:40.235889",
+    "details": {}
+  },
+  {
+    "log_id": "c2017f78-1a22-41c7-9b14-b2fe1d4b4c3f",
+    "application_id": "APP_20250603_191740_0002",
+    "action": "Application requires manual review - auto-processing skipped",
+    "timestamp": "2025-06-03T19:17:42.264337",
+    "details": {}
+  },
+  {
+    "log_id": "e42bd53d-ea1e-43f0-904d-18d46ac4cefd",
+    "application_id": "APP_20250603_192146_0003",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:21:46.859196",
+    "details": {}
+  },
+  {
+    "log_id": "b124b574-c529-414f-b899-af128eecb28a",
+    "application_id": "APP_20250603_192146_0003",
+    "action": "Application requires manual review - auto-processing skipped",
+    "timestamp": "2025-06-03T19:21:48.872867",
+    "details": {}
+  },
+  {
+    "log_id": "42edb588-5d84-45d6-b366-1f063caf0313",
+    "application_id": "APP_20250603_192248_0004",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:22:48.255299",
+    "details": {}
+  },
+  {
+    "log_id": "6ffc118f-dc3a-4fc5-a4c3-b5d7f32a1942",
+    "application_id": "APP_20250603_192248_0004",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T19:22:50.266368",
+    "details": {}
+  },
+  {
+    "log_id": "ae5ce687-a083-4e65-a599-3e75ef4f2878",
+    "application_id": "APP_20250603_192248_0004",
+    "action": "Payment validation failed - Status: PENDING, Score: 82",
+    "timestamp": "2025-06-03T19:22:55.662543",
+    "details": {}
+  },
+  {
+    "log_id": "fad00ecb-90f3-46ff-a61c-84afebebc6ee",
+    "application_id": "APP_20250603_192406_0005",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:24:06.969398",
+    "details": {}
+  },
+  {
+    "log_id": "d0a9b568-7a27-4abf-a231-a99cc76b4186",
+    "application_id": "APP_20250603_192406_0005",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T19:24:09.002537",
+    "details": {}
+  },
+  {
+    "log_id": "38d56de4-a36a-4f64-850e-b4d2bcd014f0",
+    "application_id": "APP_20250603_192406_0005",
+    "action": "Payment validation failed - Status: PENDING, Score: 79",
+    "timestamp": "2025-06-03T19:24:14.237965",
+    "details": {}
+  },
+  {
+    "log_id": "bcedd8f2-8479-4588-b508-b0f6804fe02d",
+    "application_id": "APP_20250603_192915_0006",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:29:15.742153",
+    "details": {}
+  },
+  {
+    "log_id": "2bb15e73-8601-4d79-92dd-87d94acbc0e3",
+    "application_id": "APP_20250603_192915_0006",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T19:29:17.756093",
+    "details": {}
+  },
+  {
+    "log_id": "9203af98-8157-40b1-8d45-fef95d186bd7",
+    "application_id": "APP_20250603_192915_0006",
+    "action": "Payment validation failed - Status: PENDING, Score: 79",
+    "timestamp": "2025-06-03T19:29:23.033930",
+    "details": {}
+  },
+  {
+    "log_id": "dc9a11e4-9dcb-4d15-888a-cc3df2cefdbe",
+    "application_id": "APP_20250603_193422_0007",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:34:22.984323",
+    "details": {}
+  },
+  {
+    "log_id": "943d04d8-931e-4e01-95d7-7ac5510e4f40",
+    "application_id": "APP_20250603_193422_0007",
+    "action": "Application requires manual review - auto-processing skipped",
+    "timestamp": "2025-06-03T19:34:24.986524",
+    "details": {}
+  },
+  {
+    "log_id": "568e0f8f-ed15-454f-a8fd-65cc7d4d0d98",
+    "application_id": "APP_20250603_193828_0008",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:38:28.914462",
+    "details": {}
+  },
+  {
+    "log_id": "42ad6282-156d-4c8a-ad30-62d6a0ef9bff",
+    "application_id": "APP_20250603_193828_0008",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T19:38:30.895377",
+    "details": {}
+  },
+  {
+    "log_id": "d1812bb7-d84e-4f74-9dff-23a551b0e228",
+    "application_id": "APP_20250603_193828_0008",
+    "action": "Payment validation failed - Status: PENDING, Score: 76",
+    "timestamp": "2025-06-03T19:38:36.157344",
+    "details": {}
+  },
+  {
+    "log_id": "6eae079a-350e-4a43-9ea0-1857fb2e5757",
+    "application_id": "APP_20250603_194010_0009",
+    "action": "Application submitted - auto-processing initiated",
+    "timestamp": "2025-06-03T19:40:10.492983",
+    "details": {}
+  },
+  {
+    "log_id": "bb0e7733-6993-4ce0-aabb-da726ec15774",
+    "application_id": "APP_20250603_194010_0009",
+    "action": "Starting automatic processing",
+    "timestamp": "2025-06-03T19:40:12.491869",
+    "details": {}
+  },
+  {
+    "log_id": "875417c7-26ca-4e3e-901f-851c059d7d32",
+    "application_id": "APP_20250603_194010_0009",
+    "action": "Payment auto-validated successfully - Score: 77",
+    "timestamp": "2025-06-03T19:40:17.715206",
+    "details": {}
+  },
+  {
+    "log_id": "0f509bd7-a4f9-416f-b541-af8f9326f47f",
+    "application_id": "APP_20250603_194010_0009",
+    "action": "Certificate auto-issued successfully",
+    "timestamp": "2025-06-03T19:40:20.721524",
+    "details": {}
   }
 ]

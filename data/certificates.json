@@ -1,0 +1,21 @@
+[
+  {
+    "certificate_id": "CERT_20250603_194020_0001",
+    "application_id": "APP_20250603_194010_0009",
+    "name": "Jane Lim",
+    "status": "Valid",
+    "issue_date": "2025-06-03T19:40:20.718535",
+    "validity": {
+      "start": "2025-06-03",
+      "end": "2026-06-03"
+    },
+    "delivery_medium": "Smart Card",
+    "revoked": false,
+    "nric": "S7654321D",
+    "passport": null,
+    "email": "rkbisoi777atwork@gmail.com",
+    "organisation": "ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI\nKALWA",
+    "nationality": "Singaporean",
+    "auto_issued": true
+  }
+]
