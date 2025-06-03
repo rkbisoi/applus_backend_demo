@@ -1,0 +1,22 @@
+new/
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode and PyCharm settings (optional)
+.vscode/
+.idea/
+
+# Mac system files (optional)
+.DS_Store

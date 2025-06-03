@@ -1,0 +1,43 @@
+# setup.py - Installation script
+"""
+Digital Certificate API Setup Script
+
+To install and run:
+1. pip install -r requirements.txt
+2. python main.py
+
+Or use uvicorn directly:
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+"""
+
+# docker-compose.yml (optional)
+version: '3.8'
+
+services:
+  certificate-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ENV=production
+
+# Dockerfile (optional)
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# .env file template
+# Copy this to .env and customize
+API_HOST=0.0.0.0
+API_PORT=8000
+SECRET_KEY=your-secret-key-here
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001

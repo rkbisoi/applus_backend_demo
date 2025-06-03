@@ -1,0 +1,5 @@
+application_id,status,current_step,submission_date,name,nric,passport,dob,nationality,email,organisation,address,certificate_type,payment_mode,attachments,history
+APP202506037AACBA29,Pending Verification,Document Verification,2025-06-03T13:26:34.248309,sdasfas,fasfasdf,,2025-06-06,dsadas,roshan@atalgo.com,"ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI
+KALWA",", Thane, Maharashtra (IN)",USB Crypto Token,Bank In,[],"[{'step': 'Submitted', 'timestamp': '2025-06-03T13:26:34.248309Z'}, {'step': 'Documents Received', 'timestamp': '2025-06-03T13:56:34.248309Z'}]"
+APP20250603A9F28C77,Pending Verification,Document Verification,2025-06-03T14:07:51.028085,sdasfas,fasfasdf,,2025-06-13,dsadas,rkbisoi777@gmail.com,"ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI
+KALWA",", Thane, Maharashtra (IN)",USB Crypto Token,Bank In,[],"[{'step': 'Submitted', 'timestamp': '2025-06-03T14:07:51.028085Z'}, {'step': 'Documents Received', 'timestamp': '2025-06-03T14:37:51.028085Z'}]"

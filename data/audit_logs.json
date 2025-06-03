@@ -1,0 +1,20 @@
+[
+  {
+    "application_id": "APP202506037AACBA29",
+    "logs": [
+      {
+        "timestamp": "2025-06-03T13:26:34.251817Z",
+        "message": "Application submitted"
+      }
+    ]
+  },
+  {
+    "application_id": "APP20250603A9F28C77",
+    "logs": [
+      {
+        "timestamp": "2025-06-03T14:07:51.033392Z",
+        "message": "Application submitted"
+      }
+    ]
+  }
+]
