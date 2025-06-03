@@ -1,0 +1,30 @@
+[
+  {
+    "application_id": "APP202506034588",
+    "action": "APPLICATION_SUBMITTED",
+    "details": "Application submitted for Jane Lim",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-03T22:51:53.391286"
+  },
+  {
+    "application_id": "APP202506034588",
+    "action": "MACHINE_ASSIGNED",
+    "details": "Machine SC-002 assigned",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-03T22:51:53.399790"
+  },
+  {
+    "application_id": "APP202506034588",
+    "action": "PAYMENT_VALIDATED",
+    "details": "Auto payment validation successful",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-03T22:51:54.409041"
+  },
+  {
+    "application_id": "APP202506034588",
+    "action": "CERTIFICATE_ISSUED",
+    "details": "Certificate CERT2025060386122 issued successfully",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-03T22:51:55.424604"
+  }
+]

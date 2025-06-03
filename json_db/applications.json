@@ -1,0 +1,31 @@
+{
+  "APP202506034588": {
+    "application_id": "APP202506034588",
+    "name": "Jane Lim",
+    "nric": "S7654321D",
+    "passport": null,
+    "dob": "2025-06-02",
+    "nationality": "Singaporean",
+    "email": "roshan@atalgo.com",
+    "organisation": "ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI\nKALWA",
+    "address": ", Thane, Maharashtra (IN)",
+    "certificate_type": "Smart Card",
+    "payment_mode": "Bank In",
+    "attachments": [],
+    "assigned_machine": {
+      "machine_id": "SC-002",
+      "machine_name": "Smart Card Reader Beta",
+      "machine_config": {
+        "protocol": "T=0",
+        "voltage": "5V"
+      },
+      "assigned_at": "2025-06-03T22:51:53.390274"
+    },
+    "status": "CERTIFICATE_ISSUED",
+    "submission_date": "2025-06-03T22:51:53.390274",
+    "payment_validated": true,
+    "certificate_issued": true,
+    "payment_reference": "AUTO126611",
+    "certificate_id": "CERT2025060386122"
+  }
+}

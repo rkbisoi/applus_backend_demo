@@ -1,361 +1,211 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
+import random
 from datetime import datetime, timedelta
-import asyncio
+import time
+import json
+import os
 from pathlib import Path
 
-from payment_validator import PaymentValidator, PaymentValidationRequest, ValidationResult
-from data_manager import DataManager
+app = FastAPI(title="Certificate Management API", version="1.0.0")
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="Digital Certificate API",
-    description="API for managing digital certificate applications with enhanced payment validation",
-    version="2.0.0"
-)
-
-# Enable CORS for frontend connection
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize data manager and payment validator
-data_manager = DataManager()
-payment_validator = PaymentValidator()
+# Machine Pool Configuration
+MACHINE_POOLS = {
+    "USB Crypto Token": [
+        {"id": "USB-001", "name": "USB Token Machine Alpha", "config": {"encryption": "AES-256", "driver": "PKCS#11"}},
+        {"id": "USB-002", "name": "USB Token Machine Beta", "config": {"encryption": "RSA-2048", "driver": "PKCS#11"}},
+        {"id": "USB-003", "name": "USB Token Machine Gamma", "config": {"encryption": "ECC-P256", "driver": "PKCS#11"}},
+    ],
+    "Smart Card": [
+        {"id": "SC-001", "name": "Smart Card Reader Alpha", "config": {"protocol": "T=1", "voltage": "3V"}},
+        {"id": "SC-002", "name": "Smart Card Reader Beta", "config": {"protocol": "T=0", "voltage": "5V"}},
+        {"id": "SC-003", "name": "Smart Card Reader Gamma", "config": {"protocol": "T=1", "voltage": "1.8V"}},
+    ],
+    "Softcert": [
+        {"id": "SOFT-001", "name": "Software Certificate Engine Alpha", "config": {"keystore": "PKCS#12", "algorithm": "RSA"}},
+        {"id": "SOFT-002", "name": "Software Certificate Engine Beta", "config": {"keystore": "JKS", "algorithm": "ECDSA"}},
+        {"id": "SOFT-003", "name": "Software Certificate Engine Gamma", "config": {"keystore": "PKCS#12", "algorithm": "EdDSA"}},
+    ]
+}
 
-# Pydantic models
-class Attachment(BaseModel):
-    file_name: str
-    file_type: str
-    url: str
+# JSON Database Configuration
+DB_DIR = Path("json_db")
+DB_DIR.mkdir(exist_ok=True)
 
-class CertificateApplication(BaseModel):
+APPLICATIONS_DB_FILE = DB_DIR / "applications.json"
+CERTIFICATES_DB_FILE = DB_DIR / "certificates.json"
+AUDIT_LOG_FILE = DB_DIR / "audit_log.json"
+
+# Database Helper Functions
+def load_json_db(file_path: Path, default_value=None):
+    """Load data from JSON file"""
+    if default_value is None:
+        default_value = {}
+    
+    if file_path.exists():
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            return default_value
+    return default_value
+
+def save_json_db(file_path: Path, data):
+    """Save data to JSON file"""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def get_applications_db():
+    """Get applications database"""
+    return load_json_db(APPLICATIONS_DB_FILE, {})
+
+def save_applications_db(data):
+    """Save applications database"""
+    save_json_db(APPLICATIONS_DB_FILE, data)
+
+def get_certificates_db():
+    """Get certificates database"""
+    return load_json_db(CERTIFICATES_DB_FILE, {})
+
+def save_certificates_db(data):
+    """Save certificates database"""
+    save_json_db(CERTIFICATES_DB_FILE, data)
+
+def get_audit_log():
+    """Get audit log"""
+    return load_json_db(AUDIT_LOG_FILE, [])
+
+def save_audit_log(data):
+    """Save audit log"""
+    save_json_db(AUDIT_LOG_FILE, data)
+
+# Pydantic Models
+class ApplicationRequest(BaseModel):
     name: str
     nric: Optional[str] = None
     passport: Optional[str] = None
-    dob: str  # Date of birth in YYYY-MM-DD format
+    dob: str
     nationality: str
-    email: EmailStr
+    email: str
     organisation: Optional[str] = None
     address: Optional[str] = None
-    certificate_type: str  # "Smart Card", "USB Token", "Softcert", etc.
-    payment_mode: str  # "Bank In", "Credit Card", etc.
-    attachments: Optional[List[Attachment]] = []
+    certificate_type: str  # USB Crypto Token, Smart Card, Softcert
+    payment_mode: str = "Bank In"
+    attachments: List[str] = []
+    auto_processing: bool = False
 
-class CertificateIssuance(BaseModel):
+class PaymentValidationRequest(BaseModel):
+    application_id: str
+    payment_type: str
+    bank_name: str
+    amount: float
+    reference_no: str
+    machine_id: str
+    proof_url: Optional[str] = None
+
+class CertificateIssueRequest(BaseModel):
     application_id: str
 
-class ApplicationHistory(BaseModel):
-    step: str
-    timestamp: str
+# Utility Functions
+def generate_application_id() -> str:
+    """Generate unique application ID"""
+    return f"APP{datetime.now().strftime('%Y%m%d')}{random.randint(1000, 9999)}"
 
-class ApplicationStatus(BaseModel):
-    application_id: str
-    status: str
-    current_step: str
-    history: List[ApplicationHistory]
+def generate_certificate_id() -> str:
+    """Generate unique certificate ID"""
+    return f"CERT{datetime.now().strftime('%Y%m%d')}{random.randint(10000, 99999)}"
 
-# Business logic for auto-processing
-async def should_auto_approve_application(application_data: dict) -> bool:
-    """Business logic to determine if application should be auto-approved"""
+def assign_machine(certificate_type: str) -> Dict[str, Any]:
+    """Randomly assign a machine from the pool based on certificate type"""
+    if certificate_type not in MACHINE_POOLS:
+        raise HTTPException(status_code=400, detail=f"Invalid certificate type: {certificate_type}")
     
-    trusted_domains = [
-        "gov.sg", "edu.sg", "com.sg", "org.sg",  # Singapore domains
-        "gmail.com", "yahoo.com", "hotmail.com", "outlook.com"  # Common email providers
-    ]
+    machines = MACHINE_POOLS[certificate_type]
+    selected_machine = random.choice(machines)
     
-    standard_cert_types = ["Smart Card", "USB Token", "Softcert", "Mobile Certificate"]
-    
-    # Check identification
-    has_identification = bool(application_data.get("nric") or application_data.get("passport"))
-    
-    # Check email domain
-    email = application_data.get("email", "")
-    email_domain = email.split("@")[-1].lower() if "@" in email else ""
-    trusted_email = email_domain in trusted_domains
-    
-    # Check certificate type
-    standard_cert = application_data.get("certificate_type") in standard_cert_types
-    
-    # Check required fields
-    required_fields = ["name", "dob", "nationality", "email", "certificate_type", "payment_mode"]
-    has_required_fields = all(application_data.get(field) for field in required_fields)
-    
-    return has_identification and trusted_email and standard_cert and has_required_fields
+    return {
+        "machine_id": selected_machine["id"],
+        "machine_name": selected_machine["name"],
+        "machine_config": selected_machine["config"],
+        "assigned_at": datetime.now().isoformat()
+    }
 
-async def process_application_automatically(application_id: str, application_data: dict):
-    """Background task to automatically process the application"""
-    
-    try:
-        # Wait for initial processing (simulate document verification time)
-        await asyncio.sleep(2)
-        
-        # Check if application should be auto-approved
-        # if not await should_auto_approve_application(application_data):
-        #     data_manager.add_audit_log(application_id, "Application requires manual review - auto-processing skipped")
-        #     return
-        
-        data_manager.add_audit_log(application_id, "Starting automatic processing")
-        
-        # Step 1: Auto-validate payment (after 5 seconds)
-        await asyncio.sleep(5)
-        
-        # Generate payment validation request from sample payload structure
-        payment_request = PaymentValidationRequest(
-            application_id=application_id,
-            payment_initiation_type="cardNotPresentPan",
-            payment_information={
-                "account_type": "default",
-                "payment_type": "single",
-                "transmission_date": datetime.now().strftime("%Y-%m-%d"),
-                "transmission_time": datetime.now().strftime("%H:%M:%S"),
-                "local_transaction_date": datetime.now().strftime("%Y-%m-%d"),
-                "local_transaction_time": datetime.now().strftime("%H:%M:%S"),
-                "settlement_date": datetime.now().strftime("%Y-%m-%d"),
-                "retrieval_reference_number": f"00000{application_id[-6:]}",
-                "system_trace_audit_number": "000000"
-            },
-            transaction_accept_method="electronicCommerce",
-            merchant_information={
-                "card_acceptor_name": "DigitalCertProvider",
-                "format_card_acceptor": "32",
-                "merchant_category_code": "1234"
-            },
-            acquiring_information={
-                "merchant_id": f"ABC{application_id[-9:]}",
-                "terminal_id": "00000000",
-                "acquiring_institution_id": "000031",
-                "forwarding_institution_id": "000031"
-            },
-            etp_pos_secure={
-                "security_level_indicator": "unauthenticated"
-            }
-        )
-        
-        # Validate payment with 3 criteria
-        validation_result = await payment_validator.validate_payment(payment_request)
-        
-        # Update application based on validation results
-        if validation_result.overall_status == "APPROVED":
-            await internal_validate_payment_success(application_id, validation_result)
-            data_manager.add_audit_log(application_id, f"Payment auto-validated successfully - Score: {validation_result.overall_score}")
-            
-            # Step 2: Auto-issue certificate (after additional 3 seconds)
-            await asyncio.sleep(3)
-            
-            issuance = CertificateIssuance(application_id=application_id)
-            await internal_issue_certificate(issuance)
-            data_manager.add_audit_log(application_id, "Certificate auto-issued successfully")
-        else:
-            data_manager.add_audit_log(application_id, f"Payment validation failed - Status: {validation_result.overall_status}, Score: {validation_result.overall_score}")
-            # Update application status to reflect payment failure
-            await internal_validate_payment_failure(application_id, validation_result)
-        
-    except Exception as e:
-        data_manager.add_audit_log(application_id, f"Auto-processing failed: {str(e)}")
-
-# Internal functions for payment processing
-async def internal_validate_payment_success(application_id: str, validation_result: ValidationResult):
-    """Internal payment validation success handler"""
-    applications = data_manager.load_applications()
-    payments = data_manager.load_payments()
-    
-    # Find application
-    application = None
-    app_index = None
-    for i, app in enumerate(applications):
-        if app["application_id"] == application_id:
-            application = app
-            app_index = i
-            break
-    
-    if not application:
-        raise Exception("Application not found")
-    
-    # Create payment record
-    payment_record = {
+def add_audit_log(application_id: str, action: str, details: str, status: str = "SUCCESS"):
+    """Add entry to audit log"""
+    audit_log = get_audit_log()
+    audit_log.append({
         "application_id": application_id,
-        "validation_result": validation_result.dict(),
-        "validation_date": datetime.now().isoformat(),
-        "status": "Validated",
-        "auto_processed": True,
-        "functional_score": validation_result.functional_score,
-        "performance_score": validation_result.performance_score,
-        "security_score": validation_result.security_score,
-        "overall_score": validation_result.overall_score,
-        "overall_status": validation_result.overall_status
-    }
-    
-    # Add payment record
-    payments.append(payment_record)
-    data_manager.save_payments(payments)
-    
-    # Update application status
-    applications[app_index]["status"] = "Payment Validated"
-    applications[app_index]["current_step"] = "Certificate Generation"
-    applications[app_index]["payment_validated"] = True
-    applications[app_index]["payment_date"] = datetime.now().isoformat()
-    applications[app_index]["payment_validation_details"] = validation_result.dict()
-    
-    # Add to history
-    if "history" not in applications[app_index]:
-        applications[app_index]["history"] = []
-    
-    applications[app_index]["history"].append({
-        "step": "Payment Auto-Validated",
-        "timestamp": datetime.now().isoformat() + "Z",
-        "details": f"Score: {validation_result.overall_score}/100"
+        "action": action,
+        "details": details,
+        "status": status,
+        "timestamp": datetime.now().isoformat()
     })
-    
-    data_manager.save_applications(applications)
+    save_audit_log(audit_log)
 
-async def internal_validate_payment_failure(application_id: str, validation_result: ValidationResult):
-    """Internal payment validation failure handler"""
-    applications = data_manager.load_applications()
-    payments = data_manager.load_payments()
+def validate_payment_simple(payment_data: PaymentValidationRequest) -> Dict[str, Any]:
+    """Simple payment validation with basic checks"""
     
-    # Find application
-    application = None
-    app_index = None
-    for i, app in enumerate(applications):
-        if app["application_id"] == application_id:
-            application = app
-            app_index = i
-            break
+    applications_db = get_applications_db()
     
-    if not application:
-        raise Exception("Application not found")
-    
-    # Create payment record for failed validation
-    payment_record = {
-        "application_id": application_id,
-        "validation_result": validation_result.dict(),
-        "validation_date": datetime.now().isoformat(),
-        "status": "Failed",
-        "auto_processed": True,
-        "functional_score": validation_result.functional_score,
-        "performance_score": validation_result.performance_score,
-        "security_score": validation_result.security_score,
-        "overall_score": validation_result.overall_score,
-        "overall_status": validation_result.overall_status,
-        "reason": validation_result.failure_reasons
+    # Basic validation rules
+    validation_results = {
+        "amount_valid": payment_data.amount >= 100.0,  # Minimum amount
+        "reference_valid": len(payment_data.reference_no) >= 6,  # Minimum reference length
+        "bank_valid": payment_data.bank_name.strip() != "",
+        "payment_type_valid": payment_data.payment_type in ["Bank In", "Online Transfer", "Credit Card"]
     }
     
-    # Add payment record
-    payments.append(payment_record)
-    data_manager.save_payments(payments)
-    
-    # Update application status
-    applications[app_index]["status"] = "Payment Failed"
-    applications[app_index]["current_step"] = "Payment Review Required"
-    applications[app_index]["payment_validated"] = False
-    applications[app_index]["payment_date"] = datetime.now().isoformat()
-    applications[app_index]["payment_validation_details"] = validation_result.dict()
-    
-    # Add to history
-    if "history" not in applications[app_index]:
-        applications[app_index]["history"] = []
-    
-    applications[app_index]["history"].append({
-        "step": "Payment Validation Failed",
-        "timestamp": datetime.now().isoformat() + "Z",
-        "details": f"Score: {validation_result.overall_score}/100, Reason: {', '.join(validation_result.failure_reasons)}"
-    })
-    
-    data_manager.save_applications(applications)
-
-async def internal_issue_certificate(issuance: CertificateIssuance):
-    """Internal certificate issuance without HTTP overhead"""
-    applications = data_manager.load_applications()
-    certificates = data_manager.load_certificates()
-    
-    # Find application
-    application = None
-    app_index = None
-    for i, app in enumerate(applications):
-        if app["application_id"] == issuance.application_id:
-            application = app
-            app_index = i
-            break
-    
-    if not application:
-        raise Exception("Application not found")
-    
-    if not application.get("payment_validated", False):
-        raise Exception("Payment must be validated before certificate issuance")
-    
-    # Generate certificate ID
-    certificate_id = data_manager.generate_certificate_id()
-    
-    # Create certificate record
-    certificate_record = {
-        "certificate_id": certificate_id,
-        "application_id": issuance.application_id,
-        "name": application["name"],
-        "status": "Valid",
-        "issue_date": datetime.now().isoformat(),
-        "validity": {
-            "start": datetime.now().strftime("%Y-%m-%d"),
-            "end": (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d")
-        },
-        "delivery_medium": application["certificate_type"],
-        "revoked": False,
-        "nric": application.get("nric"),
-        "passport": application.get("passport"),
-        "email": application["email"],
-        "organisation": application.get("organisation"),
-        "nationality": application["nationality"],
-        "auto_issued": True
+    # Security checks (simplified)
+    security_checks = {
+        "duplicate_reference": payment_data.reference_no not in [
+            app.get("payment_reference") for app in applications_db.values()
+        ],
+        "amount_range": 100.0 <= payment_data.amount <= 10000.0,
+        "valid_format": payment_data.reference_no.isalnum()
     }
     
-    # Add certificate record
-    certificates.append(certificate_record)
-    data_manager.save_certificates(certificates)
+    all_valid = all(validation_results.values()) and all(security_checks.values())
     
-    # Update application status
-    applications[app_index]["status"] = "Issued"
-    applications[app_index]["current_step"] = "Completed"
-    applications[app_index]["certificate_id"] = certificate_id
-    applications[app_index]["issue_date"] = datetime.now().isoformat()
-    
-    # Add to history
-    applications[app_index]["history"].append({
-        "step": "Certificate Auto-Issued",
-        "timestamp": datetime.now().isoformat() + "Z"
-    })
-    
-    data_manager.save_applications(applications)
+    return {
+        "valid": all_valid,
+        "validation_results": validation_results,
+        "security_checks": security_checks,
+        "validated_at": datetime.now().isoformat()
+    }
 
 # API Endpoints
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
-    return {"message": "Digital Certificate API with Enhanced Payment Validation", "version": "2.0.0"}
+    return {"message": "Certificate Management API", "version": "1.0.0"}
 
-@app.post("/apply", status_code=201)
-async def submit_application(application: CertificateApplication, background_tasks: BackgroundTasks):
-    """🔐 Submit a new certificate application with auto-processing"""
+@app.post("/apply")
+async def submit_application(application: ApplicationRequest):
+    """Submit certificate application"""
+    
+    applications_db = get_applications_db()
+    
     try:
-        # Load existing applications
-        applications = data_manager.load_applications()
+        # Generate application ID
+        app_id = generate_application_id()
         
-        # Generate unique application ID
-        application_id = data_manager.generate_application_id()
+        # Assign machine from pool
+        machine_info = assign_machine(application.certificate_type)
         
         # Create application record
-        app_record = {
-            "application_id": application_id,
-            "status": "Pending",
-            "current_step": "Document Verification",
-            "submission_date": datetime.now().isoformat(),
+        application_data = {
+            "application_id": app_id,
             "name": application.name,
             "nric": application.nric,
             "passport": application.passport,
@@ -366,265 +216,283 @@ async def submit_application(application: CertificateApplication, background_tas
             "address": application.address,
             "certificate_type": application.certificate_type,
             "payment_mode": application.payment_mode,
-            "attachments": [att.dict() for att in application.attachments] if application.attachments else [],
-            "auto_processing": True,
-            "history": [
-                {
-                    "step": "Submitted",
-                    "timestamp": datetime.now().isoformat() + "Z"
-                },
-                {
-                    "step": "Documents Received",
-                    "timestamp": (datetime.now() + timedelta(minutes=1)).isoformat() + "Z"
-                }
-            ]
+            "attachments": application.attachments,
+            "assigned_machine": machine_info,
+            "status": "PENDING",
+            "submission_date": datetime.now().isoformat(),
+            "payment_validated": False,
+            "certificate_issued": False
         }
         
-        # Add to applications list
-        applications.append(app_record)
+        applications_db[app_id] = application_data
+        save_applications_db(applications_db)
         
-        # Save to JSON
-        data_manager.save_applications(applications)
+        add_audit_log(app_id, "APPLICATION_SUBMITTED", f"Application submitted for {application.name}")
+        add_audit_log(app_id, "MACHINE_ASSIGNED", f"Machine {machine_info['machine_id']} assigned")
         
-        # Add audit log
-        data_manager.add_audit_log(application_id, "Application submitted - auto-processing initiated")
+        response = {
+            "application_id": app_id,
+            "status": "PENDING",
+            "assigned_machine": machine_info,
+            "message": "Application submitted successfully"
+        }
         
-        # Start background auto-processing
-        background_tasks.add_task(process_application_automatically, application_id, app_record)
+        # Auto processing if requested
+        if application.auto_processing:
+            
+            # Simulate payment validation
+            time.sleep(1)  # Simulate processing time
+            fake_payment = PaymentValidationRequest(
+                application_id=app_id,
+                payment_type=application.payment_mode,
+                bank_name="Auto Bank",
+                amount=250.0,
+                machine_id=machine_info["machine_id"],
+                reference_no=f"AUTO{random.randint(100000, 999999)}"
+            )
+            
+            print("fake",fake_payment)
+            
+            payment_result = validate_payment_simple(fake_payment)
+            
+            if payment_result["valid"]:
+                applications_db = get_applications_db()  # Reload to get latest data
+                applications_db[app_id]["payment_validated"] = True
+                applications_db[app_id]["payment_reference"] = fake_payment.reference_no
+                applications_db[app_id]["status"] = "PAYMENT_VALIDATED"
+                save_applications_db(applications_db)
+                
+                add_audit_log(app_id, "PAYMENT_VALIDATED", "Auto payment validation successful")
+                
+                # Issue certificate
+                time.sleep(1)  # Simulate processing time
+                cert_id = generate_certificate_id()
+                
+                certificate_data = {
+                    "certificate_id": cert_id,
+                    "application_id": app_id,
+                    "holder_name": application.name,
+                    "certificate_type": application.certificate_type,
+                    "issued_date": datetime.now().isoformat(),
+                    "expiry_date": (datetime.now() + timedelta(days=365)).isoformat(),
+                    "status": "ACTIVE",
+                    "serial_number": f"SN{random.randint(1000000, 9999999)}",
+                    "machine_used": machine_info["machine_id"]
+                }
+                
+                certificates_db = get_certificates_db()
+                certificates_db[cert_id] = certificate_data
+                save_certificates_db(certificates_db)
+                
+                applications_db = get_applications_db()  # Reload again
+                applications_db[app_id]["certificate_id"] = cert_id
+                applications_db[app_id]["certificate_issued"] = True
+                applications_db[app_id]["status"] = "CERTIFICATE_ISSUED"
+                save_applications_db(applications_db)
+                
+                add_audit_log(app_id, "CERTIFICATE_ISSUED", f"Certificate {cert_id} issued successfully")
+                
+                response.update({
+                    "certificate_id": cert_id,
+                    "status": "CERTIFICATE_ISSUED",
+                    "payment_validated": True,
+                    "auto_processing_completed": True
+                })
+        
+        return response
+        
+    except Exception as e:
+        add_audit_log(app_id if 'app_id' in locals() else "UNKNOWN", "ERROR", str(e), "FAILED")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/validate-payment")
+async def validate_payment(payment_data: PaymentValidationRequest):
+    """Validate payment for an application"""
+    
+    applications_db = get_applications_db()
+    
+    if payment_data.application_id not in applications_db:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    application = applications_db[payment_data.application_id]
+
+    # Check if provided machine_id matches assigned one
+    assigned_machine_id = application.get("assigned_machine", {}).get("machine_id")
+    if assigned_machine_id != payment_data.machine_id:
+        add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED",
+                      f"Machine mismatch: expected {assigned_machine_id}, got {payment_data.machine_id}",
+                      status="FAILED")
+        raise HTTPException(status_code=400, detail=f"Machine ID mismatch. Expected {assigned_machine_id}")
+    
+    try:
+        validation_result = validate_payment_simple(payment_data)
+        
+        if validation_result["valid"]:
+            application["payment_validated"] = True
+            application["payment_reference"] = payment_data.reference_no
+            application["status"] = "PAYMENT_VALIDATED"
+            application["payment_details"] = payment_data.dict()
+            save_applications_db(applications_db)
+            
+            add_audit_log(payment_data.application_id, "PAYMENT_VALIDATED", 
+                          f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.machine_id}")
+        else:
+            add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED", 
+                          f"Validation checks failed on machine {payment_data.machine_id}", "FAILED")
         
         return {
-            "application_id": application_id,
-            "status": "Pending",
-            "auto_processing": True,
-            "estimated_completion": "8-12 seconds",
-            "message": "Application submitted successfully. Enhanced payment validation initiated."
+            "application_id": payment_data.application_id,
+            "validation_result": validation_result,
+            "status": "PAYMENT_VALIDATED" if validation_result["valid"] else "PAYMENT_FAILED"
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing application: {str(e)}")
+        add_audit_log(payment_data.application_id, "PAYMENT_ERROR", str(e), "FAILED")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/issue-certificate")
+async def issue_certificate(request: CertificateIssueRequest):
+    """Issue certificate for validated application"""
+    
+    applications_db = get_applications_db()
+    
+    if request.application_id not in applications_db:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    application = applications_db[request.application_id]
+    
+    if not application["payment_validated"]:
+        raise HTTPException(status_code=400, detail="Payment not validated")
+    
+    if application["certificate_issued"]:
+        raise HTTPException(status_code=400, detail="Certificate already issued")
+    
+    try:
+        cert_id = generate_certificate_id()
+        
+        certificate_data = {
+            "certificate_id": cert_id,
+            "application_id": request.application_id,
+            "holder_name": application["name"],
+            "certificate_type": application["certificate_type"],
+            "issued_date": datetime.now().isoformat(),
+            "expiry_date": (datetime.now() + timedelta(days=365)).isoformat(),
+            "status": "ACTIVE",
+            "serial_number": f"SN{random.randint(1000000, 9999999)}",
+            "machine_used": application["assigned_machine"]["machine_id"]
+        }
+        
+        certificates_db = get_certificates_db()
+        certificates_db[cert_id] = certificate_data
+        save_certificates_db(certificates_db)
+        
+        applications_db[request.application_id]["certificate_id"] = cert_id
+        applications_db[request.application_id]["certificate_issued"] = True
+        applications_db[request.application_id]["status"] = "CERTIFICATE_ISSUED"
+        save_applications_db(applications_db)
+        
+        add_audit_log(request.application_id, "CERTIFICATE_ISSUED", 
+                     f"Certificate {cert_id} issued successfully")
+        
+        return {
+            "certificate_id": cert_id,
+            "application_id": request.application_id,
+            "status": "CERTIFICATE_ISSUED",
+            "certificate_details": certificate_data
+        }
+        
+    except Exception as e:
+        add_audit_log(request.application_id, "CERTIFICATE_ISSUE_ERROR", str(e), "FAILED")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/application/{application_id}")
 async def get_application_status(application_id: str):
-    """🧾 Check status of an application"""
-    try:
-        applications = data_manager.load_applications()
-        
-        # Find application
-        application = None
-        for app in applications:
-            if app["application_id"] == application_id:
-                application = app
-                break
-        
-        if not application:
-            raise HTTPException(status_code=404, detail="Application not found")
-        
-        return {
-            "application_id": application_id,
-            "status": application["status"],
-            "current_step": application["current_step"],
-            "auto_processing": application.get("auto_processing", False),
-            "certificate_id": application.get("certificate_id"),
-            "payment_validation_details": application.get("payment_validation_details"),
-            "history": application.get("history", [])
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving application: {str(e)}")
+    """Get application status and details"""
+    
+    applications_db = get_applications_db()
+    
+    if application_id not in applications_db:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    return applications_db[application_id]
 
-@app.post("/validate-payment-manual")
-async def validate_payment_manual(payment_request: PaymentValidationRequest):
-    """💳 Manual payment validation with 3-criteria assessment"""
-    try:
-        # Validate payment with 3 criteria
-        validation_result = await payment_validator.validate_payment(payment_request)
-        
-        # Update application based on validation results
-        if validation_result.overall_status == "APPROVED":
-            await internal_validate_payment_success(payment_request.application_id, validation_result)
-            data_manager.add_audit_log(
-                payment_request.application_id, 
-                f"Payment manually validated - Score: {validation_result.overall_score}/100"
-            )
-        else:
-            await internal_validate_payment_failure(payment_request.application_id, validation_result)
-            data_manager.add_audit_log(
-                payment_request.application_id, 
-                f"Payment manual validation failed - Score: {validation_result.overall_score}/100"
-            )
-        
-        return {
-            "application_id": payment_request.application_id,
-            "validation_result": validation_result.dict(),
-            "method": "Manual"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error validating payment: {str(e)}")
-
-@app.post("/issue-certificate")
-async def issue_certificate(issuance: CertificateIssuance):
-    """📜 Simulate issuance of the digital certificate (Manual override)"""
-    try:
-        await internal_issue_certificate(issuance)
-        
-        # Get the issued certificate details
-        certificates = data_manager.load_certificates()
-        certificate = None
-        for cert in certificates:
-            if cert.get("application_id") == issuance.application_id:
-                certificate = cert
-                break
-        
-        data_manager.add_audit_log(issuance.application_id, f"Certificate manually issued: {certificate['certificate_id']}")
-        
-        return {
-            "application_id": issuance.application_id,
-            "certificate_id": certificate["certificate_id"],
-            "status": "Issued",
-            "validity": f"{certificate['validity']['start']} to {certificate['validity']['end']}",
-            "delivery_medium": certificate["delivery_medium"],
-            "download_url": f"https://example.com/certificates/{certificate['certificate_id']}.pem",
-            "method": "Manual"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error issuing certificate: {str(e)}")
-
-@app.get("/certificate/{identifier}")
-async def get_certificate_info(identifier: str):
-    """🧪 View certificate info & validity - accepts certificate ID or application ID"""
-    try:
-        certificates = data_manager.load_certificates()
-        
-        # Find certificate by certificate_id first
-        certificate = None
-        for cert in certificates:
-            if cert["certificate_id"] == identifier:
-                certificate = cert
-                break
-        
-        # If not found by certificate_id, try by application_id
-        if not certificate:
-            for cert in certificates:
-                if cert.get("application_id") == identifier:
-                    certificate = cert
-                    break
-        
-        if not certificate:
-            # Check if it's an application that hasn't been issued yet
-            applications = data_manager.load_applications()
-            for app in applications:
-                if app["application_id"] == identifier:
-                    return {
-                        "error": "Certificate not yet issued",
-                        "application_id": identifier,
-                        "current_status": app["status"],
-                        "current_step": app["current_step"],
-                        "auto_processing": app.get("auto_processing", False),
-                        "payment_validation_details": app.get("payment_validation_details"),
-                        "message": "Processing in progress" if app.get("auto_processing") else "Complete payment validation and certificate issuance first"
-                    }
-            
-            raise HTTPException(status_code=404, detail="Certificate or application not found")
-        
-        return {
-            "certificate_id": certificate["certificate_id"],
-            "application_id": certificate.get("application_id"),
-            "name": certificate["name"],
-            "status": certificate["status"],
-            "validity": certificate["validity"],
-            "revoked": certificate["revoked"],
-            "issue_date": certificate.get("issue_date"),
-            "delivery_medium": certificate.get("delivery_medium"),
-            "organisation": certificate.get("organisation"),
-            "email": certificate.get("email"),
-            "auto_issued": certificate.get("auto_issued", False)
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving certificate: {str(e)}")
-
-@app.get("/audit-trail")
-async def get_audit_trail(application_id: str):
-    """🧾 Return application trace logs"""
-    try:
-        return data_manager.get_audit_trail(application_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving audit trail: {str(e)}")
+@app.get("/certificate/{application_id}")
+async def get_certificate_info(application_id: str):
+    """Get certificate information"""
+    
+    certificates = get_certificates_db()
+    for cert in certificates.values():
+        if cert["application_id"] == application_id:
+            return cert
+    raise HTTPException(status_code=404, detail="Certificate with given application ID not found")
 
 @app.get("/applications")
-async def list_all_applications():
-    """List all applications (for admin use)"""
-    try:
-        applications = data_manager.load_applications()
-        return {
-            "total_applications": len(applications),
-            "applications": applications
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving applications: {str(e)}")
+async def get_all_applications():
+    """Get all applications"""
+    applications_db = get_applications_db()
+    return {
+        "applications": list(applications_db.values()),
+        "total_count": len(applications_db)
+    }
 
 @app.get("/certificates")
-async def list_all_certificates():
-    """List all certificates (for admin use)"""
-    try:
-        certificates = data_manager.load_certificates()
-        return {
-            "total_certificates": len(certificates),
-            "certificates": certificates
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving certificates: {str(e)}")
+async def get_all_certificates():
+    """Get all certificates"""
+    certificates_db = get_certificates_db()
+    return {
+        "certificates": list(certificates_db.values()),
+        "total_count": len(certificates_db)
+    }
 
-@app.get("/payments")
-async def list_all_payments():
-    """List all payment validation records (for admin use)"""
-    try:
-        payments = data_manager.load_payments()
-        return {
-            "total_payments": len(payments),
-            "payments": payments
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving payments: {str(e)}")
+@app.get("/audit-trail")
+async def get_audit_trail(application_id: Optional[str] = None):
+    """Get audit trail"""
+    
+    audit_log = get_audit_log()
+    
+    if application_id:
+        filtered_logs = [log for log in audit_log if log["application_id"] == application_id]
+        return {"audit_trail": filtered_logs}
+    
+    return {"audit_trail": audit_log}
 
 @app.post("/certificate/{certificate_id}/revoke")
 async def revoke_certificate(certificate_id: str):
     """Revoke a certificate"""
-    try:
-        certificates = data_manager.load_certificates()
-        
-        # Find and update certificate
-        cert_index = None
-        for i, cert in enumerate(certificates):
-            if cert["certificate_id"] == certificate_id:
-                cert_index = i
-                break
-        
-        if cert_index is None:
-            raise HTTPException(status_code=404, detail="Certificate not found")
-        
-        certificates[cert_index]["status"] = "Revoked"
-        certificates[cert_index]["revoked"] = True
-        certificates[cert_index]["revocation_date"] = datetime.now().isoformat()
-        
-        data_manager.save_certificates(certificates)
-        
-        return {
-            "certificate_id": certificate_id,
-            "status": "Revoked",
-            "revocation_date": certificates[cert_index]["revocation_date"]
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error revoking certificate: {str(e)}")
+    
+    certificates_db = get_certificates_db()
+    
+    if certificate_id not in certificates_db:
+        raise HTTPException(status_code=404, detail="Certificate not found")
+    
+    certificates_db[certificate_id]["status"] = "REVOKED"
+    certificates_db[certificate_id]["revoked_date"] = datetime.now().isoformat()
+    
+    applications_db = get_applications_db()
+    
+    # Find and update application
+    for app in applications_db.values():
+        if app.get("certificate_id") == certificate_id:
+            app["status"] = "CERTIFICATE_REVOKED"
+            add_audit_log(app["application_id"], "CERTIFICATE_REVOKED", 
+                         f"Certificate {certificate_id} revoked")
+            break
+    
+    return {
+        "certificate_id": certificate_id,
+        "status": "REVOKED",
+        "message": "Certificate revoked successfully"
+    }
+
+@app.get("/machine-pools")
+async def get_machine_pools():
+    """Get machine pool information"""
+    return {
+        "machine_pools": MACHINE_POOLS,
+        "total_machines": sum(len(machines) for machines in MACHINE_POOLS.values())
+    }
 
 if __name__ == "__main__":
     import uvicorn

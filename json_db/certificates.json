@@ -1,0 +1,13 @@
+{
+  "CERT2025060386122": {
+    "certificate_id": "CERT2025060386122",
+    "application_id": "APP202506034588",
+    "holder_name": "Jane Lim",
+    "certificate_type": "Smart Card",
+    "issued_date": "2025-06-03T22:51:55.422602",
+    "expiry_date": "2026-06-03T22:51:55.422602",
+    "status": "ACTIVE",
+    "serial_number": "SN6200716",
+    "machine_used": "SC-002"
+  }
+}
