@@ -111,7 +111,7 @@ class PaymentValidationRequest(BaseModel):
     bank_name: str
     amount: float
     reference_no: str
-    machine_id: str
+    # machine_id: str
     proof_url: Optional[str] = None
 
 class CertificateIssueRequest(BaseModel):
@@ -247,7 +247,7 @@ async def submit_application(application: ApplicationRequest):
                 payment_type=application.payment_mode,
                 bank_name="Auto Bank",
                 amount=250.0,
-                machine_id=machine_info["machine_id"],
+                # machine_id=machine_info["machine_id"],
                 reference_no=f"AUTO{random.randint(100000, 999999)}"
             )
             
@@ -318,12 +318,12 @@ async def validate_payment(payment_data: PaymentValidationRequest):
     application = applications_db[payment_data.application_id]
 
     # Check if provided machine_id matches assigned one
-    assigned_machine_id = application.get("assigned_machine", {}).get("machine_id")
-    if assigned_machine_id != payment_data.machine_id:
-        add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED",
-                      f"Machine mismatch: expected {assigned_machine_id}, got {payment_data.machine_id}",
-                      status="FAILED")
-        raise HTTPException(status_code=400, detail=f"Machine ID mismatch. Expected {assigned_machine_id}")
+    # assigned_machine_id = application.get("assigned_machine", {}).get("machine_id")
+    # if assigned_machine_id != payment_data.machine_id:
+    #     add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED",
+    #                   f"Machine mismatch: expected {assigned_machine_id}, got {payment_data.machine_id}",
+    #                   status="FAILED")
+    #     raise HTTPException(status_code=400, detail=f"Machine ID mismatch. Expected {assigned_machine_id}")
     
     try:
         validation_result = validate_payment_simple(payment_data)
@@ -336,10 +336,10 @@ async def validate_payment(payment_data: PaymentValidationRequest):
             save_applications_db(applications_db)
             
             add_audit_log(payment_data.application_id, "PAYMENT_VALIDATED", 
-                          f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.machine_id}")
+                          f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.application_id}")
         else:
             add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED", 
-                          f"Validation checks failed on machine {payment_data.machine_id}", "FAILED")
+                          f"Validation checks failed on machine {payment_data.application_id}", "FAILED")
         
         return {
             "application_id": payment_data.application_id,

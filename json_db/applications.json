@@ -21,11 +21,19 @@
       },
       "assigned_at": "2025-06-03T22:51:53.390274"
     },
-    "status": "CERTIFICATE_ISSUED",
+    "status": "PAYMENT_VALIDATED",
     "submission_date": "2025-06-03T22:51:53.390274",
     "payment_validated": true,
     "certificate_issued": true,
-    "payment_reference": "AUTO126611",
-    "certificate_id": "CERT2025060386122"
+    "payment_reference": "REF123456",
+    "certificate_id": "CERT2025060386122",
+    "payment_details": {
+      "application_id": "APP202506034588",
+      "payment_type": "Bank In",
+      "bank_name": "DBS Bank",
+      "amount": 250.0,
+      "reference_no": "REF123456",
+      "proof_url": null
+    }
   }
 }

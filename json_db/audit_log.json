@@ -26,5 +26,19 @@
     "details": "Certificate CERT2025060386122 issued successfully",
     "status": "SUCCESS",
     "timestamp": "2025-06-03T22:51:55.424604"
+  },
+  {
+    "application_id": "APP202506034588",
+    "action": "PAYMENT_ERROR",
+    "details": "'PaymentValidationRequest' object has no attribute 'machine_id'",
+    "status": "FAILED",
+    "timestamp": "2025-06-04T01:32:46.026793"
+  },
+  {
+    "application_id": "APP202506034588",
+    "action": "PAYMENT_VALIDATION_FAILED",
+    "details": "Validation checks failed on machine APP202506034588",
+    "status": "FAILED",
+    "timestamp": "2025-06-04T01:33:57.525400"
   }
 ]
