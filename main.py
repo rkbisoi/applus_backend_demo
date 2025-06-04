@@ -159,7 +159,7 @@ def validate_payment_simple(payment_data: PaymentValidationRequest) -> Dict[str,
     applications_db = get_applications_db()
     
     # Basic validation rules
-    validation_results = {
+    validation_checks = {
         "amount_valid": payment_data.amount >= 100.0,  # Minimum amount
         "reference_valid": len(payment_data.reference_no) >= 6,  # Minimum reference length
         "bank_valid": payment_data.bank_name.strip() != "",
@@ -175,12 +175,18 @@ def validate_payment_simple(payment_data: PaymentValidationRequest) -> Dict[str,
         "valid_format": payment_data.reference_no.isalnum()
     }
     
-    all_valid = all(validation_results.values()) and all(security_checks.values())
+    all_valid = all(validation_checks.values()) and all(security_checks.values())
     
     return {
         "valid": all_valid,
-        "validation_results": validation_results,
-        "security_checks": security_checks,
+        # "validation_checks": validation_checks,
+        # "security_checks": security_checks,
+        "amount_valid": payment_data.amount >= 100.0,  # Minimum amount
+        "reference_valid": len(payment_data.reference_no) >= 6,  # Minimum reference length
+        "bank_valid": payment_data.bank_name.strip() != "",
+        "payment_type_valid": payment_data.payment_type in ["Bank In", "Online Transfer", "Credit Card"],
+        "amount_range": 100.0 <= payment_data.amount <= 10000.0,
+        "valid_format": payment_data.reference_no.isalnum(),
         "validated_at": datetime.now().isoformat()
     }
 
