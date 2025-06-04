@@ -181,11 +181,11 @@ def validate_payment_simple(payment_data: PaymentValidationRequest) -> Dict[str,
         "valid": all_valid,
         # "validation_checks": validation_checks,
         # "security_checks": security_checks,
-        "amount_valid": 0 <= payment_data.amount <= 10000.0,  # Minimum amount
+        "amount_valid": 101 <= payment_data.amount <= 10000.0,  # Minimum amount
         "reference_valid": len(payment_data.reference_no) >= 6,  # Minimum reference length
         "bank_valid": payment_data.bank_name.strip() != "",
         "payment_type_valid": payment_data.payment_type in ["Bank In", "Online Transfer", "Credit Card"],
-        "amount_range": 100.0 <= payment_data.amount <= 10000.0,
+        "amount_range": 101 <= payment_data.amount <= 10000.0,
         "valid_format": payment_data.reference_no.isalnum(),
         "validated_at": datetime.now().isoformat()
     }
