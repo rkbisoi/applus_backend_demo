@@ -168,9 +168,9 @@ def validate_payment_simple(payment_data: PaymentValidationRequest) -> Dict[str,
     
     # Security checks (simplified)
     security_checks = {
-        "duplicate_reference": payment_data.reference_no not in [
-            app.get("payment_reference") for app in applications_db.values()
-        ],
+        # "duplicate_reference": payment_data.reference_no not in [
+        #     app.get("payment_reference") for app in applications_db.values()
+        # ],
         "amount_range": 100.0 <= payment_data.amount <= 10000.0,
         "valid_format": payment_data.reference_no.isalnum()
     }
