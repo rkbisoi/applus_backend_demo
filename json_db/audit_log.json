@@ -124,5 +124,12 @@
     "details": "Certificate CERT2025060450005 issued successfully",
     "status": "SUCCESS",
     "timestamp": "2025-06-04T12:52:49.177345"
+  },
+  {
+    "application_id": "APP202506045565",
+    "action": "CERTIFICATE_ISSUED",
+    "details": "Payment validated with reference REF1234569843 on machine APP202506045565",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T13:08:09.518080"
   }
 ]

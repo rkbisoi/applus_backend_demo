@@ -259,10 +259,10 @@ async def submit_application(application: ApplicationRequest):
                 applications_db = get_applications_db()  # Reload to get latest data
                 applications_db[app_id]["payment_validated"] = True
                 applications_db[app_id]["payment_reference"] = fake_payment.reference_no
-                applications_db[app_id]["status"] = "PAYMENT_VALIDATED"
+                applications_db[app_id]["status"] = "CERTIFICATE_ISSUED"
                 save_applications_db(applications_db)
                 
-                add_audit_log(app_id, "PAYMENT_VALIDATED", "Auto payment validation successful")
+                add_audit_log(app_id, "CERTIFICATE_ISSUED", "Auto payment validation successful")
                 
                 # Issue certificate
                 time.sleep(1)  # Simulate processing time
@@ -331,11 +331,11 @@ async def validate_payment(payment_data: PaymentValidationRequest):
         if validation_result["valid"]:
             application["payment_validated"] = True
             application["payment_reference"] = payment_data.reference_no
-            application["status"] = "PAYMENT_VALIDATED"
+            application["status"] = "CERTIFICATE_ISSUED"
             application["payment_details"] = payment_data.dict()
             save_applications_db(applications_db)
             
-            add_audit_log(payment_data.application_id, "PAYMENT_VALIDATED", 
+            add_audit_log(payment_data.application_id, "CERTIFICATE_ISSUED", 
                           f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.application_id}")
         else:
             add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED", 
@@ -344,7 +344,7 @@ async def validate_payment(payment_data: PaymentValidationRequest):
         return {
             "application_id": payment_data.application_id,
             "validation_result": validation_result,
-            "status": "PAYMENT_VALIDATED" if validation_result["valid"] else "PAYMENT_FAILED"
+            "status": "CERTIFICATE_ISSUED" if validation_result["valid"] else "PAYMENT_FAILED"
         }
         
     except Exception as e:
