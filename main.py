@@ -306,6 +306,7 @@ async def submit_application(application: ApplicationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
 @app.post("/validate-payment")
 async def validate_payment(payment_data: PaymentValidationRequest):
     """Validate payment for an application"""
@@ -331,25 +332,96 @@ async def validate_payment(payment_data: PaymentValidationRequest):
         if validation_result["valid"]:
             application["payment_validated"] = True
             application["payment_reference"] = payment_data.reference_no
-            application["status"] = "CERTIFICATE_ISSUED"
+            application["status"] = "PAYMENT_VALIDATED"
             application["payment_details"] = payment_data.dict()
             save_applications_db(applications_db)
             
-            add_audit_log(payment_data.application_id, "CERTIFICATE_ISSUED", 
-                          f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.application_id}")
+            add_audit_log(payment_data.application_id, "PAYMENT_VALIDATED", 
+                          f"Payment validated with reference {payment_data.reference_no}")
+            
+            return {
+                "detail":{
+                    "application_id": payment_data.application_id,
+                    "validation_result": validation_result,
+                    "status": "PAYMENT_VALIDATED",
+                    "message": "Payment validation successful"
+                }   
+            }
         else:
             add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED", 
-                          f"Validation checks failed on machine {payment_data.application_id}", "FAILED")
+                          f"Validation checks failed", "FAILED")
+            
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "application_id": payment_data.application_id,
+                    "validation_result": validation_result,
+                    "status": "PAYMENT_VALIDATION_FAILED",
+                    "message": "Payment validation failed"
+                }
+            )
         
-        return {
-            "application_id": payment_data.application_id,
-            "validation_result": validation_result,
-            "status": "CERTIFICATE_ISSUED" if validation_result["valid"] else "PAYMENT_FAILED"
-        }
-        
+    except HTTPException:
+        # Re-raise HTTPException as is
+        raise
     except Exception as e:
         add_audit_log(payment_data.application_id, "PAYMENT_ERROR", str(e), "FAILED")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+# @app.post("/validate-payment")
+# async def validate_payment(payment_data: PaymentValidationRequest):
+#     """Validate payment for an application"""
+    
+#     applications_db = get_applications_db()
+    
+#     if payment_data.application_id not in applications_db:
+#         raise HTTPException(status_code=404, detail="Application not found")
+    
+#     application = applications_db[payment_data.application_id]
+
+#     # Check if provided machine_id matches assigned one
+#     # assigned_machine_id = application.get("assigned_machine", {}).get("machine_id")
+#     # if assigned_machine_id != payment_data.machine_id:
+#     #     add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED",
+#     #                   f"Machine mismatch: expected {assigned_machine_id}, got {payment_data.machine_id}",
+#     #                   status="FAILED")
+#     #     raise HTTPException(status_code=400, detail=f"Machine ID mismatch. Expected {assigned_machine_id}")
+    
+#     try:
+#         validation_result = validate_payment_simple(payment_data)
+        
+#         if validation_result["valid"]:
+#             application["payment_validated"] = True
+#             application["payment_reference"] = payment_data.reference_no
+#             application["status"] = "CERTIFICATE_ISSUED"
+#             application["payment_details"] = payment_data.dict()
+#             save_applications_db(applications_db)
+            
+#             add_audit_log(payment_data.application_id, "CERTIFICATE_ISSUED", 
+#                           f"Payment validated with reference {payment_data.reference_no} on machine {payment_data.application_id}")
+#         else:
+#             add_audit_log(payment_data.application_id, "PAYMENT_VALIDATION_FAILED", 
+#                           f"Validation checks failed on machine {payment_data.application_id}", "FAILED")
+            
+#             # raise HTTPException(
+#             #     status_code=400,
+#             #     detail="Payment validation failed: " + json.dumps(validation_result)
+#             # )
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail="Payment validation failed"
+#             )
+        
+#         # return {
+#         #     "application_id": payment_data.application_id,
+#         #     "validation_result": validation_result,
+#         #     "status": "CERTIFICATE_ISSUED" if validation_result["valid"] else "PAYMENT_FAILED"
+#         # }
+        
+#     except Exception as e:
+#         add_audit_log(payment_data.application_id, "PAYMENT_ERROR", str(e), "FAILED")
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/issue-certificate")
