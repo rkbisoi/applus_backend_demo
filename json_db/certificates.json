@@ -9,5 +9,16 @@
     "status": "ACTIVE",
     "serial_number": "SN6200716",
     "machine_used": "SC-002"
+  },
+  "CERT2025060479407": {
+    "certificate_id": "CERT2025060479407",
+    "application_id": "APP202506045565",
+    "holder_name": "Roshan Bisoi",
+    "certificate_type": "USB Crypto Token",
+    "issued_date": "2025-06-04T12:50:00.596595",
+    "expiry_date": "2026-06-04T12:50:00.596595",
+    "status": "ACTIVE",
+    "serial_number": "SN4508673",
+    "machine_used": "USB-002"
   }
 }

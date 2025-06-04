@@ -40,5 +40,89 @@
     "details": "Validation checks failed on machine APP202506034588",
     "status": "FAILED",
     "timestamp": "2025-06-04T01:33:57.525400"
+  },
+  {
+    "application_id": "APP202506045565",
+    "action": "APPLICATION_SUBMITTED",
+    "details": "Application submitted for Roshan Bisoi",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:49:58.534453"
+  },
+  {
+    "application_id": "APP202506045565",
+    "action": "MACHINE_ASSIGNED",
+    "details": "Machine USB-002 assigned",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:49:58.562404"
+  },
+  {
+    "application_id": "APP202506045565",
+    "action": "PAYMENT_VALIDATED",
+    "details": "Auto payment validation successful",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:49:59.589735"
+  },
+  {
+    "application_id": "APP202506045565",
+    "action": "CERTIFICATE_ISSUED",
+    "details": "Certificate CERT2025060479407 issued successfully",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:50:00.644451"
+  },
+  {
+    "application_id": "APP202506048706",
+    "action": "APPLICATION_SUBMITTED",
+    "details": "Application submitted for Waliur Rahman",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:51:19.528177"
+  },
+  {
+    "application_id": "APP202506048706",
+    "action": "MACHINE_ASSIGNED",
+    "details": "Machine SOFT-001 assigned",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:51:19.566164"
+  },
+  {
+    "application_id": "APP202506048706",
+    "action": "PAYMENT_VALIDATED",
+    "details": "Auto payment validation successful",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:51:20.593738"
+  },
+  {
+    "application_id": "APP202506048706",
+    "action": "CERTIFICATE_ISSUED",
+    "details": "Certificate CERT2025060470655 issued successfully",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:51:21.647092"
+  },
+  {
+    "application_id": "APP202506041347",
+    "action": "APPLICATION_SUBMITTED",
+    "details": "Application submitted for Gulam Husain",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:52:47.109836"
+  },
+  {
+    "application_id": "APP202506041347",
+    "action": "MACHINE_ASSIGNED",
+    "details": "Machine SC-001 assigned",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:52:47.143934"
+  },
+  {
+    "application_id": "APP202506041347",
+    "action": "PAYMENT_VALIDATED",
+    "details": "Auto payment validation successful",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:52:48.167042"
+  },
+  {
+    "application_id": "APP202506041347",
+    "action": "CERTIFICATE_ISSUED",
+    "details": "Certificate CERT2025060450005 issued successfully",
+    "status": "SUCCESS",
+    "timestamp": "2025-06-04T12:52:49.177345"
   }
 ]

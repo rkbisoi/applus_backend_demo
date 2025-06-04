@@ -35,5 +35,92 @@
       "reference_no": "REF123456",
       "proof_url": null
     }
+  },
+  "APP202506045565": {
+    "application_id": "APP202506045565",
+    "name": "Roshan Bisoi",
+    "nric": "S7654321D",
+    "passport": null,
+    "dob": "1989-06-04",
+    "nationality": "Indian",
+    "email": "rkbisoi777@gmail.com",
+    "organisation": "ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI\nKALWA",
+    "address": ", Thane, Maharashtra (IN)",
+    "certificate_type": "USB Crypto Token",
+    "payment_mode": "Bank In",
+    "attachments": [],
+    "assigned_machine": {
+      "machine_id": "USB-002",
+      "machine_name": "USB Token Machine Beta",
+      "machine_config": {
+        "encryption": "RSA-2048",
+        "driver": "PKCS#11"
+      },
+      "assigned_at": "2025-06-04T12:49:58.507207"
+    },
+    "status": "CERTIFICATE_ISSUED",
+    "submission_date": "2025-06-04T12:49:58.508215",
+    "payment_validated": true,
+    "certificate_issued": true,
+    "payment_reference": "AUTO864185",
+    "certificate_id": "CERT2025060479407"
+  },
+  "APP202506048706": {
+    "application_id": "APP202506048706",
+    "name": "Waliur Rahman",
+    "nric": "S7654321D",
+    "passport": null,
+    "dob": "1996-07-04",
+    "nationality": "Indian",
+    "email": "wali@atalgo.com",
+    "organisation": "ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI\nKALWA",
+    "address": ", Muzafarpur, Bihar",
+    "certificate_type": "Softcert",
+    "payment_mode": "Bank In",
+    "attachments": [],
+    "assigned_machine": {
+      "machine_id": "SOFT-001",
+      "machine_name": "Software Certificate Engine Alpha",
+      "machine_config": {
+        "keystore": "PKCS#12",
+        "algorithm": "RSA"
+      },
+      "assigned_at": "2025-06-04T12:51:19.492318"
+    },
+    "status": "PAYMENT_VALIDATION_FAILED",
+    "submission_date": "2025-06-04T12:51:19.492318",
+    "payment_validated": true,
+    "certificate_issued": true,
+    "payment_reference": "AUTO477018",
+    "certificate_id": "CERT2025060470655"
+  },
+  "APP202506041347": {
+    "application_id": "APP202506041347",
+    "name": "Gulam Husain",
+    "nric": "S7654321D",
+    "passport": null,
+    "dob": "1985-06-13",
+    "nationality": "Australian",
+    "email": "gulam@atalgo.com",
+    "organisation": "ROOM NO-301, CHANDRAKANT TOWER, KUMBHAR ALI\nKALWA",
+    "address": ", Perth, Perth",
+    "certificate_type": "Smart Card",
+    "payment_mode": "Bank In",
+    "attachments": [],
+    "assigned_machine": {
+      "machine_id": "SC-001",
+      "machine_name": "Smart Card Reader Alpha",
+      "machine_config": {
+        "protocol": "T=1",
+        "voltage": "3V"
+      },
+      "assigned_at": "2025-06-04T12:52:47.105827"
+    },
+    "status": "PENDING",
+    "submission_date": "2025-06-04T12:52:47.105827",
+    "payment_validated": true,
+    "certificate_issued": true,
+    "payment_reference": "AUTO454219",
+    "certificate_id": "CERT2025060450005"
   }
 }
