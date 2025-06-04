@@ -342,7 +342,7 @@ async def validate_payment(payment_data: PaymentValidationRequest):
             return {
                 "detail":{
                     "application_id": payment_data.application_id,
-                    "validation_result": validation_result,
+                    "result": validation_result,
                     "status": "CERTIFICATE_ISSUED",
                     "message": "Payment validation successful"
                 }   
@@ -355,7 +355,7 @@ async def validate_payment(payment_data: PaymentValidationRequest):
                 status_code=400,
                 detail={
                     "application_id": payment_data.application_id,
-                    "validation_result": validation_result,
+                    "result": validation_result,
                     "status": "PAYMENT_VALIDATION_FAILED",
                     "message": "Payment validation failed"
                 }
