@@ -332,18 +332,18 @@ async def validate_payment(payment_data: PaymentValidationRequest):
         if validation_result["valid"]:
             application["payment_validated"] = True
             application["payment_reference"] = payment_data.reference_no
-            application["status"] = "PAYMENT_VALIDATED"
+            application["status"] = "CERTIFICATE_ISSUED"
             application["payment_details"] = payment_data.dict()
             save_applications_db(applications_db)
             
-            add_audit_log(payment_data.application_id, "PAYMENT_VALIDATED", 
+            add_audit_log(payment_data.application_id, "CERTIFICATE_ISSUED", 
                           f"Payment validated with reference {payment_data.reference_no}")
             
             return {
                 "detail":{
                     "application_id": payment_data.application_id,
                     "validation_result": validation_result,
-                    "status": "PAYMENT_VALIDATED",
+                    "status": "CERTIFICATE_ISSUED",
                     "message": "Payment validation successful"
                 }   
             }
